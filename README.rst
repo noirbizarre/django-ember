@@ -11,11 +11,11 @@ Django Ember is inspired from:
 Installation
 ------------
 
-You can install Django Ember with pip:
+You can install Django Ember with pip::
 
     pip install django-ember
 
-or with easy_install:
+or with easy_install::
 
     easy_install django-ember
 
@@ -34,7 +34,7 @@ You can either:
 
     {% load ember %}
 
-- load the template tag lib into each template via ``setting.py``::
+- load the template tag lib by adding to your ``setting.py``::
 
     from django.template.loader import add_to_builtins
 
@@ -44,16 +44,16 @@ You can either:
 JS Libraries templates tags
 ***************************
 
-========================= ==================================================================
+========================= ===================================================================
            Tag                                         JS Library
-========================= ==================================================================
- ``{% handlebars_js %}``   Handlebars.js
- ``{% jquery_js %}``       jQuery
- ``{% ember_js %}``        Ember.js
+========================= ===================================================================
+ ``{% handlebars_js %}``   Handlebars.js (1.0.beta.6)
+ ``{% jquery_js %}``       jQuery (1.7.2)
+ ``{% ember_js %}``        Ember.js (1.0.pre)
+ ``{% ember_data_js %}``   Ember Data (git)
  ``{% ember_full_js %}``   Ember.js + Handlebars.js + jQuery
- ``{% ember_data_js %}``   Ember Data
  ``{% emberpie_js %}``     Ember.js + Handlebars.js + jQuery + Ember Data + Tastypie Adapter
-========================= ==================================================================
+========================= ===================================================================
 
 Exemple::
 
@@ -71,7 +71,7 @@ Will render into insert the follwing JS lib script tags:
 
 JS Template helpers
 *******************
-Django Ember provide 2 template tags to ease the JS templating: `handlebars` and `verbatim`
+Django Ember provide 2 template tags to ease the JS templating: ``handlebars`` and ``verbatim``
 
 handlebars
 ~~~~~~~~~~
@@ -87,7 +87,6 @@ Call the template tag, and write your Handlebars template ::
 The following block with end-up in your page ::
 
     <script type="text/x-handlebars" data-template-name="tpl-infos">
-
         {{total}} result(s).
         <p>Min: {{min}}</p>
         <p>Max: {{max}}</p>
@@ -98,11 +97,9 @@ verbatim
 ~~~~~~~~
 
 A ``{% verbatim %}`` tag is available to escape a specific part. For
-example, you may want a subpart of your *Handlebars* template to be
-rendered by Django ::
+example, you may want a subpart of your template to be rendered by Django ::
 
     <script type="text/x-handlebars" id="tpl-django-form">
-
         <form>
             {% verbatim %}
                 {{#if id}}<h1>{{ id }}</h1>{{/if}}
