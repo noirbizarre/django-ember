@@ -1,6 +1,9 @@
 Django Ember
 ============
 
+.. image:: https://secure.travis-ci.org/noirbizarre/django-ember.png
+   :target: http://travis-ci.org/noirbizarre/django-ember
+
 Django Ember help integrates Ember.js in Django.
 
 Django Ember is inspired from:
