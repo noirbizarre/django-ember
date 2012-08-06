@@ -39,7 +39,7 @@ You can either:
 
 - load the template tag lib by adding to your ``setting.py``::
 
-    from django.template.loader import add_to_builtins
+    from django.template import add_to_builtins
 
     add_to_builtins('ember.templatetags.ember')
 
