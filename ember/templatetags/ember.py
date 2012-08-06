@@ -164,6 +164,11 @@ def ember_data_js():
 
 
 @register.simple_tag
+def tastypie_adapter_js():
+    return include_js('tastypie_adapter.js')
+
+
+@register.simple_tag
 def ember_full_js():
     return '\n'.join((
         jquery_js(),
@@ -177,5 +182,5 @@ def emberpie_js():
     return '\n'.join((
             ember_full_js(),
             ember_data_js(),
-            include_js('tastypie_adapter.js')
+            tastypie_adapter_js()
         ))

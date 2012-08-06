@@ -44,16 +44,17 @@ You can either:
 JS Libraries templates tags
 ***************************
 
-========================= ===================================================================
-           Tag                                         JS Library
-========================= ===================================================================
- ``{% handlebars_js %}``   Handlebars.js (1.0.beta.6)
- ``{% jquery_js %}``       jQuery (1.7.2)
- ``{% ember_js %}``        Ember.js (1.0.pre)
- ``{% ember_data_js %}``   Ember Data (git)
- ``{% ember_full_js %}``   Ember.js + Handlebars.js + jQuery
- ``{% emberpie_js %}``     Ember.js + Handlebars.js + jQuery + Ember Data + Tastypie Adapter
-========================= ===================================================================
+=============================  =================================================================
+              Tag                                           JS Library
+=============================  =================================================================
+``{% handlebars_js %}``        Handlebars.js (1.0.beta.6)
+``{% jquery_js %}``            jQuery (1.7.2)
+``{% ember_js %}``             Ember.js (1.0.pre)
+``{% ember_data_js %}``        Ember Data (git)
+``{% tastypie_adapter_js %}``  Tastypie Adapter for Ember Data (git)
+``{% ember_full_js %}``        Ember.js + Handlebars.js + jQuery
+``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery + Ember Data + Tastypie Adapter
+=============================  =================================================================
 
 Exemple::
 

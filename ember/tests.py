@@ -82,6 +82,15 @@ class TemplateTagsTest(TestCase):
         rendered = t.render(Context())
         self.failUnless('<script type="text/javascript" src="/static/js/libs/ember-data.js">' in rendered)
 
+    def test_tastypie_adapter_js(self):
+        '''Should include Tastypie Adapterlibrary'''
+        t = Template('''
+            {% load ember %}
+            {% tastypie_adapter_js %}
+            ''')
+        rendered = t.render(Context())
+        self.failUnless('<script type="text/javascript" src="/static/js/libs/tastypie_adapter.js">' in rendered)
+
     def test_ember_full_js(self):
         '''Should include Ember full JS stack libraries'''
         t = Template('''
