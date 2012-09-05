@@ -21,6 +21,25 @@ class TemplateTagsTest(TestCase):
         self.failUnless('<p>' in rendered)
         self.failUnless('</p>' in rendered)
 
+    def test_rendering_without_template_id(self):
+        '''Should render handlebars without data-template-name'''
+        t = Template('''
+            {% load ember %}
+            {% handlebars %}
+                <p>{{name}}</p>
+                {{{rawname}}}
+                No data-template-name in here.
+            {% endhandlebars %}
+            ''')
+        rendered = t.render(Context())
+
+        self.failUnless('<script type="text/x-handlebars">' in rendered)
+        self.failUnless('{{name}}' in rendered)
+        self.failUnless('{{{rawname}}}' in rendered)
+        # HTML should not be escaped
+        self.failUnless('<p>' in rendered)
+        self.failUnless('</p>' in rendered)
+
     def test_rendering_with_tags(self):
         '''Should process django template tags'''
         t = Template('''
