@@ -73,13 +73,15 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
         key = meta.options.key || type.prototype.get('namingConvention').foreignKey(key);
         value = jsonObject[key];
         if (!!value) {
-          jsonObject[key] = deurlify(value);
+          jsonObject[key] = (meta.options.embedded) ? value : deurlify(value);
         }
       } else if (meta.kind === "hasMany") {
         key = meta.options.key || type.prototype.get('namingConvention').keyToJSONKey(key);
-        jsonObject[key].forEach(function(item, i, collection) {
-          collection[i] = deurlify(item);
-        });
+        if (!!jsonObject[key]) {
+          jsonObject[key].forEach(function(item, i, collection) {
+            collection[i] = (meta.options.embedded) ? item : deurlify(item);
+          });
+        }
       }
     });
     return jsonObject;
