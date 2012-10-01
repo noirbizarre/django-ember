@@ -46,15 +46,6 @@ class TemplateTagsTest(TestCase):
         self.failUnless('<p>' in rendered)
         self.failUnless('</p>' in rendered)
 
-    def test_jquery_js(self):
-        '''Should include jQuery library'''
-        t = Template('''
-            {% load ember %}
-            {% jquery_js %}
-            ''')
-        rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery.js">' in rendered)
-
     def test_handlebars_js(self):
         '''Should include Handlebars library'''
         t = Template('''
@@ -98,7 +89,7 @@ class TemplateTagsTest(TestCase):
             {% ember_full_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery' in rendered)
         self.failUnless('<script type="text/javascript" src="/static/js/libs/handlebars.js">' in rendered)
         self.failUnless('<script type="text/javascript" src="/static/js/libs/ember.js">' in rendered)
 
@@ -109,7 +100,7 @@ class TemplateTagsTest(TestCase):
             {% emberpie_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery' in rendered)
         self.failUnless('<script type="text/javascript" src="/static/js/libs/handlebars.js">' in rendered)
         self.failUnless('<script type="text/javascript" src="/static/js/libs/ember.js">' in rendered)
         self.failUnless('<script type="text/javascript" src="/static/js/libs/ember-data.js">' in rendered)

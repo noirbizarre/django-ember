@@ -5,8 +5,7 @@ Django Ember
    :target: http://travis-ci.org/noirbizarre/django-ember
 
 Django Ember help integrates Ember.js in Django.
-
-Django Ember is inspired from:
+It use `Django.js`_ as base and is inspired from:
 
 - `Miguel Araujo's verbatim snippet <https://gist.github.com/893408>`_.
 - `Makina Corpus django-templatetag-handlebars <https://github.com/makinacorpus/django-templatetag-handlebars>`_.
@@ -24,6 +23,9 @@ or with easy_install::
 
 
 Add ``ember`` to your ``settings.INSTALLED_APPS``.
+
+Django Ember depends on `Django.js`_. It will be installed by pip/easy_install.
+If you want to use `Django.js`_ feature, add ``djangojs`` to your ``settings.INSTALLED_APPS``.
 
 
 Template tags
@@ -51,7 +53,6 @@ JS Libraries templates tags
               Tag                                           JS Library
 =============================  =================================================================
 ``{% handlebars_js %}``        Handlebars.js (1.0.beta.6)
-``{% jquery_js %}``            jQuery (1.7.2)
 ``{% ember_js %}``             Ember.js (1.0.pre)
 ``{% ember_data_js %}``        Ember Data (git)
 ``{% tastypie_adapter_js %}``  Tastypie Adapter for Ember Data (git)
@@ -75,11 +76,7 @@ Will render into insert the follwing JS lib script tags:
 
 JS Template helpers
 *******************
-Django Ember provide 2 template tags to ease the JS templating: ``handlebars`` and ``verbatim``
-
-handlebars
-~~~~~~~~~~
-The ``{% handlebars %}`` allow to easily write handlebars template for Ember.js.
+Django Ember the ``{% handlebars %}`` allow to easily write handlebars template for Ember.js.
 Call the template tag, and write your Handlebars template ::
 
     {% handlebars "tpl-infos" %}
@@ -97,24 +94,12 @@ The following block with end-up in your page ::
     <script>
 
 
-verbatim
-~~~~~~~~
-
-A ``{% verbatim %}`` tag is available to escape a specific part. For
-example, you may want a subpart of your template to be rendered by Django ::
-
-    <script type="text/x-handlebars" id="tpl-django-form">
-        <form>
-            {% verbatim %}
-                {{#if id}}<h1>{{ id }}</h1>{{/if}}
-            {% endverbatim %}
-            {{ yourform.as_p }}
-        </form>
-    </script>
-
 
 LICENSE
 -------
 
 - Lesser GNU Public License
 - ``Handlebars.js`` is released under the MIT license - Copyright 2011 Yehuda Katz
+
+
+.. _`Django.js`: http://pypi.python.org/pypi/django.js
