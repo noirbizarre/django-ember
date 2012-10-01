@@ -13,7 +13,7 @@ setup(
     author_email='noirbizarre+ember@gmail.com',
     packages=['ember', 'ember.templatetags'],
     include_package_data=True,
-    install_requires=['django', 'django-js'],
+    install_requires=['django', 'django.js'],
     license='LGPL',
     classifiers=[
         "Framework :: Django",
