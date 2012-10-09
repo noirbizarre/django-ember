@@ -39,7 +39,7 @@ You can either:
 
     {% load ember %}
 
-- load the template tag lib by adding to your ``setting.py``::
+- load the template tag lib by adding to your ``views.py``::
 
     from django.template import add_to_builtins
 
