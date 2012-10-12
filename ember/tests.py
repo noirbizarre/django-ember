@@ -1,5 +1,6 @@
 from django.template import Context, Template
 from django.test import TestCase
+from django.conf import settings
 
 
 class TemplateTagsTest(TestCase):
@@ -72,7 +73,7 @@ class TemplateTagsTest(TestCase):
             {% handlebars_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/handlebars.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
 
     def test_ember_js(self):
         '''Should include Ember.js library'''
@@ -81,7 +82,7 @@ class TemplateTagsTest(TestCase):
             {% ember_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/ember.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
 
     def test_ember_data_js(self):
         '''Should include Ember Data library'''
@@ -90,7 +91,7 @@ class TemplateTagsTest(TestCase):
             {% ember_data_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/ember-data.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
 
     def test_tastypie_adapter_js(self):
         '''Should include Tastypie Adapterlibrary'''
@@ -99,7 +100,7 @@ class TemplateTagsTest(TestCase):
             {% tastypie_adapter_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/tastypie_adapter.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
 
     def test_ember_full_js(self):
         '''Should include Ember full JS stack libraries'''
@@ -108,9 +109,9 @@ class TemplateTagsTest(TestCase):
             {% ember_full_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/handlebars.js">' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/ember.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
 
     def test_emberpie_js(self):
         '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
@@ -119,8 +120,8 @@ class TemplateTagsTest(TestCase):
             {% emberpie_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/jquery' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/handlebars.js">' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/ember.js">' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/ember-data.js">' in rendered)
-        self.failUnless('<script type="text/javascript" src="/static/js/libs/tastypie_adapter.js">' in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
