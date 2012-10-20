@@ -12,7 +12,12 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
    */
   tastypieApiUrl: "api/v1/",
 
-  
+  /*
+   * A dictionary from which to create the query string appended to all
+   * requests.
+   */
+  queryFields: {},
+
   /*
    * Bulk commits are not supported at this time by the adapter.
    * Changing this setting will not work
@@ -25,9 +30,9 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
   _urlifyData: function(type, model, raw){
     var self = this;
     var value;
-    
+
     var jsonData = model.toJSON({ associations: true });
-   
+
     var associations = Em.get(type, 'associationsByName');
 
     associations.forEach(function(key, meta){
@@ -220,10 +225,21 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
     return ["", this.tastypieApiUrl.slice(0,-1), url, id, ""].join('/');
   },
 
-  getTastypieUrl: function(url){
-    Em.assert("tastypieApiUrl parameters is mandatory.", !!this.tastypieApiUrl);
-    return this.serverDomain + this.tastypieApiUrl + url + "/";
- 
+  getTastypieUrl: function(url) {
+    Em.assert('tastypieApiUrl parameters is mandatory.',
+              !!this.tastypieApiUrl);
+
+    var parts = [];
+    for (var field in this.queryFields) {
+      var value = this.queryFields[field];
+      parts.push(encodeURIComponent(field) + '=' + encodeURIComponent(value));
+    }
+    queryString = parts.join('&');
+    if (queryString.length > 0) {
+      queryString = '?' + queryString;
+    }
+
+    return this.serverDomain + this.tastypieApiUrl + url + '/' + queryString;
   },
 
   ajax: function(url, type, hash) {
