@@ -1,6 +1,6 @@
 (function() {
 window.DS = Ember.Namespace.create({
-  CURRENT_API_REVISION: 6
+  CURRENT_API_REVISION: 7
 });
 
 })();
@@ -1732,8 +1732,15 @@ DS.Store = Ember.Object.extend({
 
   /**
     Adapters should call this method if they would like to acknowledge
-    that all changes related to a record have persisted. It can be
-    called for created, deleted or updated records.
+    that all changes related to a record (other than relationship
+    changes) have persisted.
+
+    Because relationship changes affect multiple records, the adapter
+    is responsible for acknowledging the change to the relationship
+    directly (using `store.didUpdateRelationship`) when all aspects
+    of the relationship change have persisted.
+
+    It can be called for created, deleted or updated records.
 
     If the adapter supplies a hash, that hash will become the new
     canonical data for the record. That will result in blowing away
@@ -1752,6 +1759,8 @@ DS.Store = Ember.Object.extend({
     Note that an adapter may not supply a hash when acknowledging
     a deleted record.
 
+    @see DS.Store#didUpdateRelationship
+
     @param {DS.Model} record the in-flight record
     @param {Object} hash an optional hash (see above)
   */
@@ -1765,12 +1774,11 @@ DS.Store = Ember.Object.extend({
     if (hash) {
       // We're about to clobber the entire data hash with new
       // data, so clear out any remaining unacknowledged changes
-      record.removeInFlightDirtyFactors();
+      record.removeInFlightDirtyFactorsForAttributes();
       this.updateId(record, hash);
       this.updateRecordHash(record, hash);
     } else {
       this.didUpdateAttributes(record);
-      this.didUpdateRelationships(record);
     }
   },
 
@@ -1904,14 +1912,61 @@ DS.Store = Ember.Object.extend({
     This allows an adapter to acknowledge that it has saved all
     necessary aspects of a relationship change.
 
-    The primary use-case for calling this method directly is an
-    adapter that saves relationships as separate entities (as
-    a "join table" or separate HTTP resource, for example).
+    This is separated from acknowledging the record itself
+    (via `didSaveRecord`) because a relationship change can
+    involve as many as three separate records. Records should
+    only move out of the in-flight state once the server has
+    acknowledged all of their relationships, and this differs
+    based upon the adapter's semantics.
 
-    @param {DS.OneToManyChange} relationship
+    There are three basic scenarios by which an adapter can
+    save a relationship.
+
+    ### Foreign Key
+
+    An adapter can save all relationship changes by updating
+    a foreign key on the child record. If it does this, it
+    should acknowledge the changes when the child record is
+    saved.
+
+        record.eachAssociation(function(name, meta) {
+          if (meta.kind === 'belongsTo') {
+            store.didUpdateRelationship(record, name);
+          }
+        });
+
+        store.didSaveRecord(record, hash);
+
+    ### Embedded in Parent
+
+    An adapter can save one-to-many relationships by embedding
+    IDs (or records) in the parent object. In this case, the
+    relationship is not considered acknowledged until both the
+    old parent and new parent have acknowledged the change.
+
+    In this case, the adapter should keep track of the old
+    parent and new parent, and acknowledge the relationship
+    change once both have acknowledged. If one of the two
+    sides does not exist (e.g. the new parent does not exist
+    because of nulling out the belongs-to relationship),
+    the adapter should acknowledge the relationship once
+    the other side has acknowledged.
+
+    ### Separate Entity
+
+    An adapter can save relationships as separate entities
+    on the server. In this case, they should acknowledge
+    the relationship as saved once the server has
+    acknowledged the entity.
+
+    @see DS.Store#didSaveRecord
+
+    @param {DS.Model} record
+    @param {DS.Model} relationshipName
   */
-  didUpdateRelationship: function(relationship) {
-    relationship.adapterDidUpdate();
+  didUpdateRelationship: function(record, relationshipName) {
+    var relationship = this.relationshipChangeFor(get(record, 'clientId'), relationshipName);
+    if (relationship) { relationship.adapterDidUpdate(); }
   },
 
   materializeHasMany: function(record, name, ids) {
@@ -3530,12 +3585,10 @@ DS.Model = Ember.Object.extend(Ember.Evented, {
     }
   },
 
-  removeInFlightDirtyFactors: function() {
-    if (!this._inFlightDirtyFactors.isEmpty()) {
-      this._inFlightDirtyFactors.clear();
-      this._inFlightDirtyReasons = null;
-      this.send('didCommit');
-    }
+  removeInFlightDirtyFactorsForAttributes: function() {
+    this.eachAttribute(function(name) {
+      this.removeInFlightDirtyFactor(name);
+    }, this);
   },
 
   // FOR USE DURING COMMIT PROCESS
@@ -5238,11 +5291,29 @@ DS.RESTAdapter = DS.Adapter.extend({
     });
   },
 
+  didSaveRecord: function(store, record, hash) {
+    record.eachAssociation(function(name, meta) {
+      if (meta.kind === 'belongsTo') {
+        store.didUpdateRelationship(record, name);
+      }
+    });
+
+    store.didSaveRecord(record, hash);
+  },
+
+  didSaveRecords: function(store, records, array) {
+    var i = 0;
+
+    records.forEach(function(record) {
+      this.didSaveRecord(store, record, array && array[i++]);
+    }, this);
+  },
+
   didCreateRecord: function(store, type, record, json) {
     var root = this.rootForType(type);
 
     this.sideload(store, type, json, root);
-    store.didSaveRecord(record, json[root]);
+    this.didSaveRecord(store, record, json[root]);
   },
 
   createRecords: function(store, type, records) {
@@ -5272,7 +5343,7 @@ DS.RESTAdapter = DS.Adapter.extend({
     var root = this.pluralize(this.rootForType(type));
 
     this.sideload(store, type, json, root);
-    store.didSaveRecords(records, json[root]);
+    this.didSaveRecords(store, records, json[root]);
   },
 
   updateRecord: function(store, type, record) {
@@ -5295,7 +5366,7 @@ DS.RESTAdapter = DS.Adapter.extend({
     var root = this.rootForType(type);
 
     this.sideload(store, type, json, root);
-    store.didSaveRecord(record, json && json[root]);
+    this.didSaveRecord(store, record, json && json[root]);
   },
 
   updateRecords: function(store, type, records) {
@@ -5325,7 +5396,7 @@ DS.RESTAdapter = DS.Adapter.extend({
     var root = this.pluralize(this.rootForType(type));
 
     this.sideload(store, type, json, root);
-    store.didSaveRecords(records, json[root]);
+    this.didSaveRecords(store, records, json[root]);
   },
 
   deleteRecord: function(store, type, record) {
@@ -5370,7 +5441,7 @@ DS.RESTAdapter = DS.Adapter.extend({
 
   didDeleteRecords: function(store, type, records, json) {
     if (json) { this.sideload(store, type, json); }
-    store.didSaveRecords(records);
+    this.didSaveRecords(store, records);
   },
 
   find: function(store, type, id) {
