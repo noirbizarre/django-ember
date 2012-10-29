@@ -13,11 +13,15 @@ It use `Django.js`_ as base and is inspired from:
 Installation
 ------------
 
-You can install Django Ember with pip::
+You can install Django Ember with pip:
+
+.. code-block:: bash
 
     pip install django-ember
 
-or with easy_install::
+or with easy_install:
+
+.. code-block:: bash
 
     easy_install django-ember
 
@@ -35,11 +39,15 @@ Loading template tags
 *********************
 You can either:
 
-- load the template tag lib into each template manually::
+- load the template tag lib into each template manually:
+
+.. code-block:: html+django
 
     {% load ember %}
 
-- load the template tag lib by adding to your ``views.py``::
+- load the template tag lib by adding to your ``views.py``:
+
+.. code-block:: python
 
     from django.template import add_to_builtins
 
@@ -60,7 +68,9 @@ JS Libraries templates tags
 ``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery + Ember Data + Tastypie Adapter
 =============================  =================================================================
 
-Exemple::
+Exemple:
+
+.. code-block:: html+django
 
     <head>
     {% ember_full_js %}
@@ -77,7 +87,9 @@ Will render into insert the follwing JS lib script tags:
 JS Template helpers
 *******************
 Django Ember the ``{% handlebars %}`` allow to easily write handlebars template for Ember.js.
-Call the template tag, and write your Handlebars template ::
+Call the template tag, and write your Handlebars template:
+
+.. code-block:: html+django
 
     {% handlebars "tpl-infos" %}
         {{total}} {% trans "result(s)." %}
@@ -85,7 +97,9 @@ Call the template tag, and write your Handlebars template ::
         <p>{% trans "Max" %}: {{max}}</p>
     {% endhandlebars %}
 
-The following block with end-up in your page ::
+The following block will be rendered in your page:
+
+.. code-block:: html+django
 
     <script type="text/x-handlebars" data-template-name="tpl-infos">
         {{total}} result(s).
