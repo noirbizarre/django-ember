@@ -64,8 +64,8 @@ JS Libraries templates tags
 ``{% ember_js %}``             Ember.js (1.0.pre)
 ``{% ember_data_js %}``        Ember Data (git)
 ``{% tastypie_adapter_js %}``  Tastypie Adapter for Ember Data (git)
-``{% ember_full_js %}``        Ember.js + Handlebars.js + jQuery
-``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery + Ember Data + Tastypie Adapter
+``{% ember_full_js %}``        Ember.js + Handlebars.js + jQuery (optionnal)
+``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery (optionnal) + Ember Data + Tastypie Adapter
 =============================  =================================================================
 
 Exemple:
@@ -82,6 +82,13 @@ Will render into insert the follwing JS lib script tags:
 - Ember.js
 - Handlebars.js
 - jQuery
+
+jQuery loading is optionnal for ``{% ember_full_js %}`` and ``{% emberpie_js %}`` tags. Simply set ``jquery`` keyword to false:
+
+.. code-block:: html+django
+
+    {% ember_full_js jquery=false %}
+    {% emberpie_js jquery=false %}
 
 
 JS Template helpers

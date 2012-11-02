@@ -87,18 +87,17 @@ def tastypie_adapter_js():
 
 
 @register.simple_tag
-def ember_full_js():
-    return '\n'.join((
-        jquery_js(),
-        handlebars_js(),
-        ember_js()
-    ))
+def ember_full_js(jquery=True):
+    libs = (handlebars_js(), ember_js())
+    if jquery:
+        libs = (jquery_js(),) + libs
+    return '\n'.join(libs)
 
 
 @register.simple_tag
-def emberpie_js():
+def emberpie_js(jquery=True):
     return '\n'.join((
-            ember_full_js(),
+            ember_full_js(jquery),
             ember_data_js(),
             tastypie_adapter_js()
         ))

@@ -113,6 +113,17 @@ class TemplateTagsTest(TestCase):
         self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
         self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
 
+    def test_ember_full_js_without_jquery(self):
+        '''Should include Ember full JS stack libraries without jquery'''
+        t = Template('''
+            {% load ember %}
+            {% ember_full_js jquery=false %}
+            ''')
+        rendered = t.render(Context())
+        self.failIf('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+
     def test_emberpie_js(self):
         '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
         t = Template('''
@@ -121,6 +132,19 @@ class TemplateTagsTest(TestCase):
             ''')
         rendered = t.render(Context())
         self.failUnless('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
+        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
+
+    def test_emberpie_js_without_jquery(self):
+        '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
+        t = Template('''
+            {% load ember %}
+            {% emberpie_js jquery=false %}
+            ''')
+        rendered = t.render(Context())
+        self.failIf('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
         self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
         self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
         self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
