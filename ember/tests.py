@@ -2,6 +2,16 @@ from django.template import Context, Template
 from django.test import TestCase
 from django.conf import settings
 
+from djangojs.runners import JsTestCase
+
+
+class JsTests(JsTestCase):
+    urls = 'ember.test_urls'
+
+    def test_jasmine_suite(self):
+        '''It should run its its own Jasmine test suite'''
+        self.run_jasmine('ember_js_jasmine', title='Ember Jasmine Test Suite')
+
 
 class TemplateTagsTest(TestCase):
     def test_rendering(self):

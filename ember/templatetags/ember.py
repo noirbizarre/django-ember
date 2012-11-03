@@ -101,3 +101,11 @@ def emberpie_js(jquery=True):
             ember_data_js(),
             tastypie_adapter_js()
         ))
+
+
+@register.inclusion_tag('ember/django_ember_js_tag.html')
+def django_ember_js(init=True, jquery=True):
+    return {
+        'djangojs_init': init,
+        'djangojs_jquery': jquery,
+    }

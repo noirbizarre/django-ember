@@ -1,2 +1,3 @@
 include README.rst LICENSE
 recursive-include  ember/static *.js
+recursive-include  ember/templates *.html

@@ -1,0 +1,7 @@
+{% extends "djangojs/jasmine-runner.html" %}
+{% load ember %}
+
+{% block js_init %}
+    {{ block.super }}
+    {% django_ember_js %}
+{% endblock %}
