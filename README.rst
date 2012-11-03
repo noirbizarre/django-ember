@@ -26,7 +26,7 @@ or with easy_install:
     easy_install django-ember
 
 
-Add ``ember`` to your ``settings.INSTALLED_APPS``.
+Add ``djangojs`` and ``ember`` to your ``settings.INSTALLED_APPS``.
 
 Django Ember depends on `Django.js`_. It will be installed by pip/easy_install.
 If you want to use `Django.js`_ feature, add ``djangojs`` to your ``settings.INSTALLED_APPS``.
@@ -60,10 +60,10 @@ JS Libraries templates tags
 =============================  =================================================================
               Tag                                           JS Library
 =============================  =================================================================
-``{% handlebars_js %}``        Handlebars.js (1.0.beta.6)
-``{% ember_js %}``             Ember.js (1.0.pre)
-``{% ember_data_js %}``        Ember Data (git)
-``{% tastypie_adapter_js %}``  Tastypie Adapter for Ember Data (git)
+``{% handlebars_js %}``        `Handlebars.js`_ (1.0.rc.1)
+``{% ember_js %}``             `Ember.js`_ (1.0.0-pre.2)
+``{% ember_data_js %}``        `Ember Data`_ (git)
+``{% tastypie_adapter_js %}``  `Ember Data Tatypie Adapter`_ (git)
 ``{% ember_full_js %}``        Ember.js + Handlebars.js + jQuery (optionnal)
 ``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery (optionnal) + Ember Data + Tastypie Adapter
 =============================  =================================================================
@@ -124,3 +124,7 @@ LICENSE
 
 
 .. _`Django.js`: http://pypi.python.org/pypi/django.js
+.. _`Handlebars.js`: http://handlebarsjs.com/
+.. _`Ember.js`: http://emberjs.com/
+.. _`Ember Data`: https://github.com/emberjs/data
+.. _`Ember Data Tatypie Adapter`: https://github.com/escalant3/ember-data-tastypie-adapter
