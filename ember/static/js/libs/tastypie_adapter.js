@@ -1,258 +1,187 @@
+var get = Ember.get, set = Ember.set;
+
 DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
-  /*
-   * Set this parameter if you are planning to do cross-site
-   * requests to the destination domain. Remember trailing slash
-   */
+  /**
+    Set this parameter if you are planning to do cross-site
+    requests to the destination domain. Remember trailing slash
+  */
+  serverDomain: null,
 
-  serverDomain: "",
+  /**
+    This is the default Tastypie namespace found in the documentation.
+    You may change it if necessary when creating the adapter
+  */
+  namespace: "api/v1",
 
-  /*
-   * This is the default Tastypie url found in the documentation.
-   * You may change it if necessary when creating the adapter
-   */
-  tastypieApiUrl: "api/v1/",
-
-  /*
-   * A dictionary from which to create the query string appended to all
-   * requests.
-   */
-  queryFields: {},
-
-  /*
-   * Bulk commits are not supported at this time by the adapter.
-   * Changing this setting will not work
-   */
+  /**
+    Bulk commits are not supported at this time by the adapter.
+    Changing this setting will not work
+  */
   bulkCommit: false,
 
   /**
-   * Transforms the association fields to Resource URI django-tastypie format
-   */
-  _urlifyData: function(type, model, raw){
-    var self = this;
-    var value;
+    Serializer object to manage JSON transformations
+  */
+  serializer: DS.DjangoTastypieSerializer,
 
-    var jsonData = model.toJSON({ associations: true });
+  init: function() {
+    var serializer,
+        namespace;
 
-    var associations = Em.get(type, 'associationsByName');
+    this._super();
 
-    associations.forEach(function(key, meta){
+    namespace = get(this, 'namespace');
+    Em.assert("tastypie namespace parameter is mandatory.", !!namespace);
 
-      if (meta.kind === "belongsTo") {
-        key = meta.options.key || Em.get(model, 'namingConvention').foreignKey(key);
-        value = jsonData[key];
-        if (!!value) {
-          jsonData[key] = self.getItemUrl(type, meta, value);
-        }
+    // Make the adapter available for the serializer
+    serializer = get(this, 'serializer');
+    set(serializer, 'adapter', this);
+    set(serializer, 'namespace', namespace);
+  },
 
-      } else if (meta.kind === "hasMany") {
-        key = meta.options.key || Em.get(model, 'namingConvention').keyToJSONKey(key);
-        value = jsonData[key] || [];
-        $.each(value, function(i, item) {
-          value[i] = self.getItemUrl(type, meta, item);
-        });
-        }
+
+  /**
+    Create a record in the Django server. POST actions must
+    be enabled in the Resource
+  */
+  createRecord: function(store, type, record) {
+    var data,
+        root = this.rootForType(type);
+
+    data = record.toJSON();
+
+    this.ajax(this.buildURL(root), "POST", {
+      data: data,
+      success: function(json) {
+        this.didCreateRecord(store, record, json);
+      }
     });
-
-    return (raw) ? jsonData : JSON.stringify(jsonData);
   },
 
   /**
-   * Transforms the association fields from Resource URI django-tastypie format to IDs
-   */
-  _deurlifyData: function(type, jsonObject) {
-    var meta,
-      value;
+    Edit a record in the Django server. PUT actions must
+    be enabled in the Resource
+  */
+  updateRecord: function(store, type, record) {
+    var id,
+        data;
 
-    var deurlify = function(value) {
-      if (!!value) {
-        return value.split('/').reverse()[1];
-      }
-    };
+    id = Em.get(record, 'id');
+    root = this.rootForType(type);
 
-    var associations = Em.get(type, 'associationsByName'),
-        self = this;
+    data = record.toJSON();
 
-    associations.forEach(function(key, meta) {
-      meta = type.metaForProperty(key);
-
-      if (meta.kind === "belongsTo") {
-        key = meta.options.key || type.prototype.get('namingConvention').foreignKey(key);
-        value = jsonObject[key];
-        if (!!value) {
-          jsonObject[key] = (meta.options.embedded) ? self._deurlifyData( meta.type, value ) : deurlify(value);
-        }
-      } else if (meta.kind === "hasMany") {
-        key = meta.options.key || type.prototype.get('namingConvention').keyToJSONKey(key);
-        if (!!jsonObject[key]) {
-          jsonObject[key].forEach(function(item, i, collection) {
-            collection[i] = (meta.options.embedded) ? item : deurlify(item);
-          });
-        }
-      }
-    });
-    return jsonObject;
-  },
-
-  /*
-   * Create a record in the Django server. POST actions must
-   * be enabled in the Resource
-   */
-  createRecord: function(store, type, model) {
-    var self = this;
-    var root = this.rootForType(type);
-
-    var data = this._urlifyData(type, model);
-
-    this.ajax(root, "POST", {
+    this.ajax(this.buildURL(root, id), "PUT", {
       data: data,
       success: function(json) {
-        json = self._deurlifyData(type, json);
-        store.didCreateRecord(model, json);
-      },
-      error: function(error) {
+        this.didUpdateRecord(store, record, json);
       }
     });
   },
 
-  /*
-   * Edit a record in the Django server. PUT actions must
-   * be enabled in the Resource
-   */
-  updateRecord: function(store, type, model) {
-    var self = this;
+  /**
+    Delete a record in the Django server. DELETE actions
+    must be enabled in the Resource
+  */
+  deleteRecord: function(store, type, record) {
+    var id,
+        root;
 
-    var id = Em.get(model, 'id');
-    var root = this.rootForType(type);
+    id = get(record, 'id');
+    root = this.rootForType(type);
 
-    var data = this._urlifyData(type, model);
-
-    var url = [root, id].join("/");
-
-    this.ajax(url, "PUT", {
-      data: data,
+    this.ajax(this.buildURL(root, id), "DELETE", {
       success: function(json) {
-        json = self._deurlifyData(type, json);
-        store.didUpdateRecord(model, json);
-      },
-      error: function(error) {
+        this.didDeleteRecord(store, record, json);
       }
     });
   },
 
-  /*
-   * Delete a record in the Django server. DELETE actions
-   * must be enabled in the Resource
-   */
-  deleteRecord: function(store, type, model) {
-    var id = Em.get(model, 'id');
-    var root = this.rootForType(type);
-
-    var url = [root, id].join("/");
-
-    this.ajax(url, "DELETE", {
-      success: function(json) {
-        store.didDeleteRecord(model);
-      }
-    });
+  /**
+    Mark record as saved in after creating
+  */
+  didCreateRecord: function(store, record, json) {
+    this.didSaveRecord(store, record, json);
   },
 
-  find: function(store, type, id) {
-    var self = this;
+  /**
+    Mark record as saved after updating
+  */
+  didUpdateRecord: function(store, record, json) {
+    this.didSaveRecord(store, record, json);
+  },
+
+  /**
+    Mark record as saved after deleting
+  */
+  didDeleteRecord: function(store, record, json) {
+    this.didSaveRecord(store, record, json);
+  },
+
+  didFindRecord: function(store, type, json, id) {
+    store.load(type, id, json);
+  },
+
+  findMany: function(store, type, ids) {
+    var url,
+        root = this.rootForType(type);
+
+    ids = get(this, 'serializer').serializeIds(ids);
 
     // FindMany array through subset of resources
-    if (id instanceof Array) {
-      id = "set/" + id.join(";");
+    if (ids instanceof Array) {
+      ids = "set/" + ids.join(";") + '/';
     }
 
-    var root = this.rootForType(type);
-    var url = [root, id].join("/");
+    url = this.buildURL(root);
+    url += ids;
 
     this.ajax(url, "GET", {
       success: function(json) {
-
-        // Loads collection for findMany
-        if (json.hasOwnProperty("objects")) {
-          json["objects"].forEach(function(item, i, collection) {
-            collection[i] = self._deurlifyData(type, item);
-          });
-          store.loadMany(type, json["objects"]);
-        // Loads unique element with find by id
-        } else {
-          json = self._deurlifyData(type, json);
-          store.load(type, json);
-        }
+        this.didFindMany(store, type, json);
       }
     });
   },
 
-  findMany: function() {
-    this.find.apply(this, arguments);
+  didFindMany: function(store, type, json) {
+    store.loadMany(type, json.objects);
   },
 
-  findAll: function(store, type) {
-    var self = this;
-    var root = this.rootForType(type);
+  didFindAll: function(store, type, json) {
+    var since = this.extractSince(json);
 
-    this.ajax(root, "GET", {
-      success: function(json) {
-        json["objects"].forEach(function(item, i, collection) {
-          collection[i] = self._deurlifyData(type, item);
-        });
-        store.loadMany(type, json["objects"]);
-      }
-    });
+    store.loadMany(type, json.objects);
+
+    // this registers the id with the store, so it will be passed
+    // into the next call to `findAll`
+    if (since) { store.sinceForType(type, since); }
+
+    store.didUpdateAll(type);
   },
 
-  findQuery: function(store, type, query, recordArray){
-    var self = this;
-    var root = this.rootForType(type);
-
-    this.ajax(root, "GET", {
-      data: query,
-      success: function(json) {
-        json["objects"].forEach(function(item, i, collection) {
-          collection[i] = self._deurlifyData(type, item);
-        });
-        recordArray.load(json["objects"]);
-      }
-    });
+  didFindQuery: function(store, type, json, recordArray) {
+    recordArray.load(json.objects);
   },
 
-  getItemUrl: function(type, meta, id){
-    var url;
-    Em.assert("tastypieApiUrl parameters is mandatory.", !!this.tastypieApiUrl);
-    url = this.rootForType(meta.type);
-    return ["", this.tastypieApiUrl.slice(0,-1), url, id, ""].join('/');
-  },
+  buildURL: function(record, suffix) {
+    var url = this._super(record, suffix);
 
-  getTastypieUrl: function(url) {
-    Em.assert('tastypieApiUrl parameters is mandatory.',
-              !!this.tastypieApiUrl);
-
-    var parts = [];
-    for (var field in this.queryFields) {
-      var value = this.queryFields[field];
-      parts.push(encodeURIComponent(field) + '=' + encodeURIComponent(value));
-    }
-    queryString = parts.join('&');
-    if (queryString.length > 0) {
-      queryString = '?' + queryString;
+    // Add the trailing slash to avoid setting requirement in Django.settings
+    if (url.charAt(url.length -1) !== '/') {
+      url += '/';
     }
 
-    return this.serverDomain + this.tastypieApiUrl + url + '/' + queryString;
-  },
+    // Add the server domain if any
+    if (!!this.serverDomain) {
+      url = this.serverDomain + url;
+    }
 
-  ajax: function(url, type, hash) {
-    hash.url = this.getTastypieUrl(url);
-    hash.type = type;
-    hash.dataType = "json";
-    hash.contentType = 'application/json';
-    jQuery.ajax(hash);
+    return url;
   },
 
   /**
-    * django-tastypie does not pluralize names for lists
-    */
+    django-tastypie does not pluralize names for lists
+  */
   pluralize: function(name) {
     return name;
   }

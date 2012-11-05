@@ -83,7 +83,10 @@ def ember_data_js():
 
 @register.simple_tag
 def tastypie_adapter_js():
-    return js_lib('tastypie_adapter.js')
+    return '\n'.join((
+        js_lib('tastypie_serializer.js'),
+        js_lib('tastypie_adapter.js'),
+    ))
 
 
 @register.simple_tag

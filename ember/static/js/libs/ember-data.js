@@ -374,7 +374,10 @@ DS.ManyArray = DS.RecordArray.extend({
         //var record = this.objectAt(i);
         //if (!record) { continue; }
 
-        var change = DS.OneToManyChange.forChildAndParent(clientId, get(this, 'store'), { parentType: owner.constructor });
+        var change = DS.OneToManyChange.forChildAndParent(clientId, get(this, 'store'), {
+          parentType: owner.constructor,
+          hasManyName: name
+        });
         change.hasManyName = name;
 
         if (change.oldParent === undefined) { change.oldParent = get(owner, 'clientId'); }
@@ -400,7 +403,10 @@ DS.ManyArray = DS.RecordArray.extend({
       for (var i=index; i<index+added; i++) {
         var clientId = get(this, 'content').objectAt(i);
 
-        var change = DS.OneToManyChange.forChildAndParent(clientId, get(this, 'store'), { parentType: owner.constructor });
+        var change = DS.OneToManyChange.forChildAndParent(clientId, get(this, 'store'), {
+          parentType: owner.constructor,
+          hasManyName: name
+        });
         change.hasManyName = name;
 
         // The oldParent will be looked up in `sync` if it
@@ -418,38 +424,6 @@ DS.ManyArray = DS.RecordArray.extend({
         change.sync();
       });
       this._changesToSync.clear();
-    }
-  },
-
-  /**
-    @private
-  */
-  assignInverse: function(record) {
-    var inverseName = DS.inverseNameFor(record.constructor, get(this, 'owner.constructor'), 'belongsTo'),
-        owner = get(this, 'owner'),
-        currentInverse;
-
-    if (inverseName) {
-      currentInverse = get(record, inverseName);
-      if (currentInverse !== owner) {
-        set(record, inverseName, owner);
-      }
-    }
-
-    return currentInverse;
-  },
-
-  /**
-    @private
-  */
-  removeInverse: function(record) {
-    var inverseName = DS.inverseNameFor(record.constructor, get(this, 'owner.constructor'), 'belongsTo');
-
-    if (inverseName) {
-      var currentInverse = get(record, inverseName);
-      if (currentInverse === get(this, 'owner')) {
-        set(record, inverseName, null);
-      }
     }
   },
 
@@ -902,6 +876,78 @@ DS.Transaction = Ember.Object.extend({
 
 
 (function() {
+var classify = Ember.String.classify, get = Ember.get;
+
+/**
+  @private
+
+  The Mappable mixin is designed to assist classes that need supply a mapping
+  API on their class, then reify that mapping to make it available on their
+  instances.
+
+  For example, DS.Store uses this mixin to implement the `registerAdapter` API.
+  API consumers can call `registerAdapter`, which adds entries to the
+  `_adaptersMap` private property.
+
+  The first time an adapter is looked up, the instance calls `_reifyMappings`
+  with the mapping name. This collapse all of the registered mappings in the
+  entire class hierarchy into a mapping on the instance.
+
+  This mixin is not currently designed for public consumption. It's API does
+  not yet expose the firm yet yielding API contours that Ember.js developers
+  expect. If you want to make this available more broadly, please clean it up
+  first.
+*/
+DS.Mappable = Ember.Mixin.create({
+  _reifyMappings: function(mappingName) {
+    var mappingsKey = '_' + mappingName + 'Map',
+        flag = '_didReify' + classify(mappingName) + 'Mappings';
+
+    if (this[flag]) { return; }
+    this[flag] = true;
+
+    var mapping = this[mappingsKey] = new Ember.Map();
+
+    var klass = this.constructor;
+
+    while (klass && klass !== DS.Store) {
+      this._reifyMappingForClass(mappingsKey, klass, mapping);
+      klass = klass.superclass;
+    }
+  },
+
+  _reifyMappingForClass: function(mappingsKey, klass, mapping) {
+    var classAdapterMap = klass[mappingsKey];
+    if (classAdapterMap) {
+      classAdapterMap.forEach(eachAdapterMap);
+    }
+
+    function eachAdapterMap(key, object) {
+      var type;
+
+      if (typeof key === 'string') {
+        type = get(Ember.lookup, key);
+        Ember.assert("Could not find model at path " + key, type);
+      } else {
+        type = key;
+      }
+
+      if (!mapping.get(type, object)) {
+        if (Ember.Object.detect(object)) {
+          object = object.create();
+        }
+
+        mapping.set(type, object);
+      }
+    }
+  }
+});
+
+})();
+
+
+
+(function() {
 /*globals Ember*/
 var get = Ember.get, set = Ember.set, fmt = Ember.String.fmt;
 
@@ -961,7 +1007,7 @@ var map = Ember.EnumerableUtils.map;
     You can learn more about writing a custom adapter by reading the `DS.Adapter`
     documentation.
 */
-DS.Store = Ember.Object.extend({
+DS.Store = Ember.Object.extend(DS.Mappable, {
 
   /**
     Many methods can be invoked without specifying which store should be used.
@@ -1043,7 +1089,7 @@ DS.Store = Ember.Object.extend({
   materializeData: function(record) {
     var clientId = get(record, 'clientId'),
         cidToHash = this.clientIdToHash,
-        adapter = get(this, '_adapter'),
+        adapter = this.adapterForType(record.constructor),
         hash = cidToHash[clientId];
 
     cidToHash[clientId] = MATERIALIZED;
@@ -1107,7 +1153,7 @@ DS.Store = Ember.Object.extend({
     @param {Object} options an options hash
   */
   toJSON: function(record, options) {
-    return get(this, '_adapter').toJSON(record, options);
+    return this.adapterForType(record.constructor).toJSON(record, options);
   },
 
   /**
@@ -1346,7 +1392,7 @@ DS.Store = Ember.Object.extend({
     var record = this.materializeRecord(type, clientId, id);
 
     // let the adapter set the data, possibly async
-    var adapter = get(this, '_adapter');
+    var adapter = this.adapterForType(type);
     if (adapter && adapter.find) { adapter.find(this, type, id); }
     else { throw "Adapter is either null or does not implement `find` method"; }
 
@@ -1459,7 +1505,7 @@ DS.Store = Ember.Object.extend({
 
     if (!neededIds.length) { return; }
 
-    var adapter = get(this, '_adapter');
+    var adapter = this.adapterForType(type);
     if (adapter && adapter.findMany) { adapter.findMany(this, type, neededIds); }
     else { throw "Adapter is either null or does not implement `findMany` method"; }
   },
@@ -1495,7 +1541,7 @@ DS.Store = Ember.Object.extend({
     //    convert them back to ids)
 
     if (!Ember.isArray(ids)) {
-      var adapter = get(this, '_adapter');
+      var adapter = this.adapterForType(type);
       if (adapter && adapter.findAssociation) { adapter.findAssociation(this, record, relationship, ids); }
       else { throw fmt("Adapter is either null or does not implement `findMany` method", this); }
 
@@ -1530,6 +1576,9 @@ DS.Store = Ember.Object.extend({
       }
 
       this.fetchMany(type, neededClientIds);
+    } else {
+      // all requested records are available
+      manyArray.set('isLoaded', true);
     }
 
     return manyArray;
@@ -1551,7 +1600,7 @@ DS.Store = Ember.Object.extend({
   */
   findQuery: function(type, query) {
     var array = DS.AdapterPopulatedRecordArray.create({ type: type, query: query, content: Ember.A([]), store: this });
-    var adapter = get(this, '_adapter');
+    var adapter = this.adapterForType(type);
     if (adapter && adapter.findQuery) { adapter.findQuery(this, type, query, array); }
     else { throw "Adapter is either null or does not implement `findQuery` method"; }
     return array;
@@ -1578,7 +1627,7 @@ DS.Store = Ember.Object.extend({
   */
   fetchAll: function(type, array) {
     var sinceToken = this.typeMapFor(type).sinceToken,
-        adapter = get(this, '_adapter');
+        adapter = this.adapterForType(type);
 
     set(array, 'isUpdating', true);
 
@@ -2056,7 +2105,8 @@ DS.Store = Ember.Object.extend({
     var typeMap = this.typeMapFor(record.constructor),
         clientId = get(record, 'clientId'),
         oldId = get(record, 'id'),
-        id = get(this, '_adapter').extractId(record.constructor, hash);
+        type = record.constructor,
+        id = this.adapterForType(type).extractId(type, hash);
 
     Ember.assert("An adapter cannot assign a new id to a record that already has an id. " + record + " had id: " + oldId + " and you tried to update it with " + id + ". This likely happened because your server returned a data hash in response to a find or update that had a different id than the one you sent.", oldId === undefined || id === oldId);
 
@@ -2341,7 +2391,7 @@ DS.Store = Ember.Object.extend({
     if (hash === undefined) {
       hash = id;
 
-      var adapter = get(this, '_adapter');
+      var adapter = this.adapterForType(type);
       id = adapter.extractId(type, hash);
     }
 
@@ -2374,7 +2424,7 @@ DS.Store = Ember.Object.extend({
       hashes = ids;
       ids = [];
 
-      var adapter = get(this, '_adapter');
+      var adapter = this.adapterForType(type);
 
       ids = map(hashes, function(hash) {
         return adapter.extractId(type, hash);
@@ -2486,6 +2536,30 @@ DS.Store = Ember.Object.extend({
 
   relationshipChangesFor: function(clientId) {
     return this.relationshipChanges[clientId];
+  },
+
+  // ......................
+  // . PER-TYPE ADAPTERS
+  // ......................
+
+  adapterForType: function(type) {
+    this._reifyMappings('adapters');
+
+    var adapter = this._adaptersMap.get(type);
+
+    if (adapter) { return adapter; }
+
+    return this.get('_adapter');
+  }
+});
+
+DS.Store.reopenClass({
+  registerAdapter: function(type, adapter) {
+    var map = this._adaptersMap || new Ember.Map();
+
+    map.set(type, adapter);
+
+    this._adaptersMap = map;
   }
 });
 
@@ -4036,7 +4110,7 @@ DS.OneToManyChange.forChildAndParent = function(childClientId, store, options) {
   var childType = store.typeForClientId(childClientId), key;
 
   if (options.parentType) {
-    key = DS.inverseNameFor(childType, options.parentType, 'belongsTo');
+    key = inverseBelongsToForHasMany(options.parentType, childType, options.hasManyName);
   } else {
     key = options.belongsToName;
   }
@@ -4120,7 +4194,7 @@ DS.OneToManyChange.prototype = {
 
       var childType = store.typeForClientId(this.child);
       var parentType = store.typeForClientId(parent);
-      name = DS.inverseNameFor(childType, parentType, 'belongsTo');
+      name = DS.inverseNameFor(childType, parentType, 'belongsTo', this.hasManyName);
 
       this.belongsToName = name;
     }
@@ -4367,6 +4441,18 @@ DS.OneToManyChange.prototype = {
     }
   }
 };
+
+function inverseBelongsToForHasMany(parentType, childType, hasManyName) {
+  // Get the options passed to the parent's DS.hasMany()
+  var options = parentType.metaForProperty(hasManyName).options;
+  var belongsToName;
+
+  if (belongsToName = options.inverse) {
+    return belongsToName;
+  }
+
+  return DS.inverseNameFor(childType, parentType, 'belongsTo');
+}
 
 })();
 
@@ -4670,11 +4756,15 @@ DS.Serializer = Ember.Object.extend({
 
   addRelationships: function(hash, record) {
     record.eachAssociation(function(name, relationship) {
-      var key = this._keyForAttributeName(record.constructor, name);
+      var key;
 
       if (relationship.kind === 'belongsTo') {
+        key = this._keyForBelongsTo(record.constructor, name);
+
         this.addBelongsTo(hash, record, key, relationship);
       } else if (relationship.kind === 'hasMany') {
+        key = this._keyForHasMany(record.constructor, name);
+
         this.addHasMany(hash, record, key, relationship);
       }
     }, this);
@@ -5239,7 +5329,7 @@ DS.fixtureAdapter = DS.FixtureAdapter.create();
 (function() {
 var get = Ember.get;
 
-DS.RESTSerializer = DS.Serializer.create({
+DS.RESTSerializer = DS.Serializer.extend({
   keyForBelongsTo: function(type, name) {
     return this.keyForAttributeName(type, name) + "_id";
   },
@@ -5249,10 +5339,9 @@ DS.RESTSerializer = DS.Serializer.create({
   },
 
   addBelongsTo: function(hash, record, key, relationship) {
-    var hashKey = this._keyForBelongsTo(record.constructor, key),
-        id = get(record, key+'.id');
+    var id = get(record, relationship.key+'.id');
 
-    if (!Ember.none(id)) { hash[hashKey] = id; }
+    if (!Ember.none(id)) { hash[key] = id; }
   }
 });
 
@@ -5380,7 +5469,7 @@ DS.RESTAdapter = DS.Adapter.extend({
     var data = {};
     data[plural] = [];
     records.forEach(function(record) {
-      data[plural].push(record.toJSON());
+      data[plural].push(this.toJSON(record, { includeId: true }));
     }, this);
 
     this.ajax(this.buildURL(root, "bulk"), "PUT", {
@@ -5413,7 +5502,7 @@ DS.RESTAdapter = DS.Adapter.extend({
 
   didDeleteRecord: function(store, type, record, json) {
     if (json) { this.sideload(store, type, json); }
-    store.didSaveRecord(record);
+    this.didSaveRecord(store, record);
   },
 
   deleteRecords: function(store, type, records) {
@@ -5422,12 +5511,13 @@ DS.RESTAdapter = DS.Adapter.extend({
     }
 
     var root = this.rootForType(type),
-        plural = this.pluralize(root);
+        plural = this.pluralize(root),
+        serializer = get(this, 'serializer');
 
     var data = {};
     data[plural] = [];
     records.forEach(function(record) {
-      data[plural].push(get(record, 'id'));
+      data[plural].push(serializer.serializeId( get(record, 'id') ));
     });
 
     this.ajax(this.buildURL(root, 'bulk'), "DELETE", {
