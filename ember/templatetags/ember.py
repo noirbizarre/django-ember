@@ -84,7 +84,7 @@ def ember_data_js():
 @register.simple_tag
 def tastypie_adapter_js():
     return '\n'.join((
-        js_lib('tastypie_serializer.js'),
+        # js_lib('tastypie_serializer.js'),
         js_lib('tastypie_adapter.js'),
     ))
 
@@ -107,8 +107,7 @@ def emberpie_js(jquery=True):
 
 
 @register.inclusion_tag('ember/django_ember_js_tag.html')
-def django_ember_js(init=True, jquery=True):
+def django_ember_js(jquery=True):
     return {
-        'djangojs_init': init,
         'djangojs_jquery': jquery,
     }

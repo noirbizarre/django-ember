@@ -10,4 +10,4 @@
 *.egg-info
 build/
 dist/
-
+.codeintel/

@@ -31,7 +31,7 @@ setup(
     author_email='noirbizarre+django@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django', 'django.js>=0.3.1'],
+    install_requires=['django', 'django.js>=0.5'],
     license='LGPL',
     classifiers=[
         "Framework :: Django",

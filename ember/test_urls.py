@@ -8,6 +8,6 @@ class JasmineTestView(JasmineView):
     js_files = 'js/specs/*.specs.js'
 
 urlpatterns = patterns('',
+    url(r'^$', JasmineTestView.as_view(), name='django_ember_tests'),
     url(r'^js/', include('djangojs.urls')),
-    url(r'^jasmine/', JasmineTestView.as_view(), name='ember_js_jasmine'),
 )
