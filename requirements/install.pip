@@ -1,2 +1,2 @@
-django>=1.4.3
+django>=1.4.2
 django.js>=0.7.0

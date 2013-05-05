@@ -42,7 +42,7 @@ setup(
     author_email='noirbizarre+django@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django', 'django.js>=0.7.0'],
+    install_requires=['django>=1.4.2', 'django.js>=0.7.0'],
     use_2to3=True,
     license='LGPL',
     classifiers=[

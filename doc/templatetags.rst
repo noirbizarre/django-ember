@@ -79,3 +79,9 @@ The following block will be rendered in your page:
         <p>Min: {{min}}</p>
         <p>Max: {{max}}</p>
     <script>
+
+.. _`Django.js`: http://pypi.python.org/pypi/django.js
+.. _`Handlebars.js`: http://handlebarsjs.com/
+.. _`Ember.js`: http://emberjs.com/
+.. _`Ember Data`: https://github.com/emberjs/data
+.. _`Ember Data Tatypie Adapter`: https://github.com/escalant3/ember-data-tastypie-adapter
