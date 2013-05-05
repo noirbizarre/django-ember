@@ -4,14 +4,25 @@ import re
 from setuptools import setup, find_packages
 
 
+PYPI_RST_FILTERS = (
+    # Replace code-blocks
+    (r'\.\.\s? code-block::\s*(\w|\+)+',  '::'),
+    # Remove travis ci badge
+    (r'.*travis-ci\.org/.*', ''),
+)
+
+
 def rst(filename):
     '''
     Load rst file and sanitize it for PyPI.
     Remove unsupported github tags:
      - code-block directive
+     - travis ci build badge
     '''
     content = open(filename).read()
-    return re.sub(r'\.\.\s? code-block::\s*(\w|\+)+', '::', content)
+    for regex, replacement in PYPI_RST_FILTERS:
+        content = re.sub(regex, replacement, content)
+    return content
 
 
 long_description = '\n'.join((
@@ -31,7 +42,7 @@ setup(
     author_email='noirbizarre+django@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django', 'django.js>=0.5'],
+    install_requires=['django', 'django.js>=0.7.0'],
     license='LGPL',
     classifiers=[
         "Framework :: Django",
