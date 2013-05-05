@@ -127,4 +127,4 @@ LICENSE
 .. _`Handlebars.js`: http://handlebarsjs.com/
 .. _`Ember.js`: http://emberjs.com/
 .. _`Ember Data`: https://github.com/emberjs/data
-.. _`Ember Data Tatypie Adapter`: https://github.com/escalant3/ember-data-tastypie-adapter
+.. _`Ember Data Tastypie Adapter`: https://github.com/escalant3/ember-data-tastypie-adapter
