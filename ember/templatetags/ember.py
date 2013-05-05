@@ -60,7 +60,7 @@ def handlebars(parser, token):
         try:
             tag_name, template_id = map(stripquote, tokens[:2])
         except ValueError:
-            raise template.TemplateSyntaxError, '%s tag requires exactly one argument' % token.split_contents()[0]
+            raise template.TemplateSyntaxError('%s tag requires exactly one argument' % token.split_contents()[0])
         return HandlebarsNode(template_id, text_and_nodes)
     else:
         return HandlebarsNode(None, text_and_nodes)

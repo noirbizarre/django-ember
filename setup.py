@@ -43,6 +43,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=['django', 'django.js>=0.7.0'],
+    use_2to3=True,
     license='LGPL',
     classifiers=[
         "Framework :: Django",
@@ -53,6 +54,7 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: System :: Software Distribution",
         "Programming Language :: Python",
+        "Programming Language :: Python 3",
         "Topic :: Software Development :: Libraries :: Python Modules",
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
     ],

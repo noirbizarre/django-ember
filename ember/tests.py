@@ -23,12 +23,12 @@ class TemplateTagsTest(TestCase):
             ''')
         rendered = t.render(Context())
 
-        self.failUnless('<script type="text/x-handlebars" data-template-name="test-template">' in rendered)
-        self.failUnless('{{name}}' in rendered)
-        self.failUnless('{{{rawname}}}' in rendered)
+        self.assertIn('<script type="text/x-handlebars" data-template-name="test-template">', rendered)
+        self.assertIn('{{name}}', rendered)
+        self.assertIn('{{{rawname}}}', rendered)
         # HTML should not be escaped
-        self.failUnless('<p>' in rendered)
-        self.failUnless('</p>' in rendered)
+        self.assertIn('<p>', rendered)
+        self.assertIn('</p>', rendered)
 
     def test_rendering_without_template_id(self):
         '''Should render handlebars without data-template-name'''
@@ -42,12 +42,12 @@ class TemplateTagsTest(TestCase):
             ''')
         rendered = t.render(Context())
 
-        self.failUnless('<script type="text/x-handlebars">' in rendered)
-        self.failUnless('{{name}}' in rendered)
-        self.failUnless('{{{rawname}}}' in rendered)
+        self.assertIn('<script type="text/x-handlebars">', rendered)
+        self.assertIn('{{name}}', rendered)
+        self.assertIn('{{{rawname}}}', rendered)
         # HTML should not be escaped
-        self.failUnless('<p>' in rendered)
-        self.failUnless('</p>' in rendered)
+        self.assertIn('<p>', rendered)
+        self.assertIn('</p>', rendered)
 
     def test_rendering_with_tags(self):
         '''Should process django template tags'''
@@ -63,16 +63,16 @@ class TemplateTagsTest(TestCase):
             ''')
         rendered = t.render(Context())
 
-        self.failUnless('<script type="text/x-handlebars" data-template-name="test-template">' in rendered)
-        self.failUnless('{{name}}' in rendered)
-        self.failUnless('{{{rawname}}}' in rendered)
-        self.failUnless('with translation' in rendered)
+        self.assertIn('<script type="text/x-handlebars" data-template-name="test-template">', rendered)
+        self.assertIn('{{name}}', rendered)
+        self.assertIn('{{{rawname}}}', rendered)
+        self.assertIn('with translation', rendered)
         # Those should not be rendered :
-        self.failUnless('{% trans %}' not in rendered)
-        self.failUnless('comments' not in rendered)
+        self.assertNotIn('{% trans %}', rendered)
+        self.assertNotIn('comments', rendered)
         # HTML should not be escaped
-        self.failUnless('<p>' in rendered)
-        self.failUnless('</p>' in rendered)
+        self.assertIn('<p>', rendered)
+        self.assertIn('</p>', rendered)
 
     def test_handlebars_js(self):
         '''Should include Handlebars library'''
@@ -81,7 +81,7 @@ class TemplateTagsTest(TestCase):
             {% handlebars_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
 
     def test_ember_js(self):
         '''Should include Ember.js library'''
@@ -90,7 +90,7 @@ class TemplateTagsTest(TestCase):
             {% ember_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
     def test_ember_data_js(self):
         '''Should include Ember Data library'''
@@ -99,7 +99,7 @@ class TemplateTagsTest(TestCase):
             {% ember_data_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL, rendered)
 
     def test_tastypie_adapter_js(self):
         '''Should include Tastypie Adapterlibrary'''
@@ -108,7 +108,7 @@ class TemplateTagsTest(TestCase):
             {% tastypie_adapter_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL, rendered)
 
     def test_ember_full_js(self):
         '''Should include Ember full JS stack libraries'''
@@ -117,9 +117,9 @@ class TemplateTagsTest(TestCase):
             {% ember_full_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
     def test_ember_full_js_without_jquery(self):
         '''Should include Ember full JS stack libraries without jquery'''
@@ -128,9 +128,9 @@ class TemplateTagsTest(TestCase):
             {% ember_full_js jquery=false %}
             ''')
         rendered = t.render(Context())
-        self.failIf('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
+        self.assertNotIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
     def test_emberpie_js(self):
         '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
@@ -139,11 +139,11 @@ class TemplateTagsTest(TestCase):
             {% emberpie_js %}
             ''')
         rendered = t.render(Context())
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL, rendered)
 
     def test_emberpie_js_without_jquery(self):
         '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
@@ -152,8 +152,8 @@ class TemplateTagsTest(TestCase):
             {% emberpie_js jquery=false %}
             ''')
         rendered = t.render(Context())
-        self.failIf('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL in rendered)
-        self.failUnless('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL in rendered)
+        self.assertNotIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL, rendered)
