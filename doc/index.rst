@@ -59,3 +59,5 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+
+.. _`Django.js`: http://pypi.python.org/pypi/django.js
