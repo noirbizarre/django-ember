@@ -120,6 +120,48 @@ The following block will be rendered in your page:
         <p>Max: {{max}}</p>
     <script>
 
+There is a linkTo helper:
+
+.. code-block:: html+django
+
+    <li class="nav">{% linkto "about" %}About{% endlinkto %}</li>
+
+The following block will be rendered in your page:
+
+.. code-block:: html
+
+    <li class="nav">{{#linkTo "about"}}About{{/linkTo}}</li>
+    
+When using ``verbatim`` style tags sometimes it is hard to spot what 
+is Ember and what is Django; the purpose of this generic ``ember`` tag is 
+making it easier.
+    
+Usage:
+    
+.. code-block:: html+django
+
+    {% ember varname %}
+    {% ember #tagname arg1 "arg2" ... argn %} ... {% ember /tagname %}
+
+    {# example: #}
+    {% ember #if spam %}
+         SPAM: {% ember spam %}
+    {% ember else %}
+         No spam for you. Try with eggs.
+    {% ember /if %}
+    
+This will render as:
+    
+.. code-block:: html
+
+    {{varname}}
+    {{#tagname arg1 "arg2" ... argn}} ... {{/tagname}}
+
+    {{#if spam}}
+         SPAM: {{spam}}
+    {{else}}
+         No spam for you. Try with eggs.
+    {{/if}}
 
 
 LICENSE
