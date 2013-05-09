@@ -12,3 +12,4 @@ build/
 dist/
 .codeintel/
 .tox
+/doc/_build

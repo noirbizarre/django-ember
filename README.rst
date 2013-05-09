@@ -89,12 +89,17 @@ Will render into insert the follwing JS lib script tags:
 - Handlebars.js
 - jQuery
 
-jQuery loading is optionnal for ``{% ember_full_js %}`` and ``{% emberpie_js %}`` tags. Simply set ``jquery`` keyword to false:
+jQuery loading is optionnal for ``{% ember_full_js %}`` and ``{% emberpie_js %}`` tags.
+Simply set ``jquery`` keyword to false:
 
 .. code-block:: html+django
 
     {% ember_full_js jquery=false %}
     {% emberpie_js jquery=false %}
+
+
+If ``settings.DEBUG=True`` the unminified versions of library is loaded
+instead of the minified versions if ``settings.DEBUG=False``.
 
 
 JS Template helpers
