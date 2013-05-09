@@ -11,6 +11,8 @@ Current
 - Make jquery optionnal for ``{% ember_full_js %}`` and ``{% emberpie_js %}``
 - Support query string in ``TastypieAdapater`` (thanks to Peter Sutton/dj-foxxy)
 - Provide both minified and unminified versions (triggered by ``settings.DEBUG``)
+- Python 3 compatible
+- Django 1.5 compatible
 
 
 0.1 (2012-08-06)
