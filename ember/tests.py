@@ -96,7 +96,7 @@ class TemplateTagsTest(TestCase):
             {% ember /if %}
             ''')
         rendered = t1.render(c)
-        load = '''{% load i18n ember %}''''
+        load = '''{% load i18n ember %}'''
         t2 = Template(load + '''{% trans "Hi," %}''')
         msg1 = t2.render(c)
         t3 = Template(load + '''{% trans "Please, sign-in." %}''')
