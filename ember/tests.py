@@ -74,6 +74,44 @@ class TemplateTagsTest(TestCase):
         self.assertIn('<p>', rendered)
         self.assertIn('</p>', rendered)
 
+    def test_rendering_linkto(self):
+        '''Test the linkto tag'''
+        t = Template('''
+            {% load ember %}
+            <li class="nav">{% linkto "about" %}About{% endlinkto %}</li>
+            ''')
+        rendered = t.render(Context())
+
+        self.assertIn('<li class="nav">{{linkTo "about"}}About{{/linkTo}}</li>', rendered)
+
+    def test_rendering_ember(self):
+        '''Test the ember escape tag'''
+        c = Context()
+        t1 = Template('''
+            {% load i18n ember %}
+            {% ember #if isAuthenticated %}
+                <h1>{% trans "Hi," %} {% ember User.firstName %}</h1>
+            {% ember else %}
+                <p>{% trans "Please, sign-in." %}</p>
+            {% ember /if %}
+            ''')
+        rendered = t1.render(c)
+        load = '''{% load i18n ember %}''''
+        t2 = Template(load + '''{% trans "Hi," %}''')
+        msg1 = t2.render(c)
+        t3 = Template(load + '''{% trans "Please, sign-in." %}''')
+        msg2 = t3.render(c)
+        # No trace of the tags
+        self.assertNotIn('ember', rendered)
+        self.assertNotIn('{%', rendered)
+        self.assertNotIn('%}', rendered)
+        # Ember tags
+        self.assertIn('{{#if isAuthenticated}}', rendered)
+        self.assertIn('{{else}}', rendered)
+        self.assertIn('{{/if}}', rendered)
+        self.assertIn('<h1>' + msg1 + ' {{User.firstName}}</h1>', rendered)
+        self.assertIn('<p>' + msg2 + '</p>', rendered)
+
     def test_handlebars_js(self):
         '''Should include Handlebars library'''
         t = Template('''
