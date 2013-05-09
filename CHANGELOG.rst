@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Current
--------
+0.2.0 (2013-05-09)
+------------------
 
 - Depends on and extend django.js
 - Upgraded to Handlebars 1.0.0.rc.3
