@@ -154,7 +154,10 @@ def do_ember(parser, token):
 
 class EmberTagNode(template.Node):
     '''
-    Helper tag to escape Ember template tags.
+    Helper tag to escape Ember template constructs that conflict
+    with Django template syntax. When using ``verbatim`` style tags
+    sometimes it is hard to spot what is Ember and what is Django;
+    the purpose of this tag is making it easier.
     
     Usage:
     
