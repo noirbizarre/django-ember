@@ -82,7 +82,7 @@ class TemplateTagsTest(TestCase):
             ''')
         rendered = t.render(Context())
 
-        self.assertIn('<li class="nav">{{linkTo "about"}}About{{/linkTo}}</li>', rendered)
+        self.assertIn('<li class="nav">{{#linkTo "about"}}About{{/linkTo}}</li>', rendered)
 
     def test_rendering_ember(self):
         '''Test the ember escape tag'''
