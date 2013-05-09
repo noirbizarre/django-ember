@@ -10,7 +10,7 @@ Current
 - Upgraded to latest Ember Data git version (e33b544)
 - Make jquery optionnal for ``{% ember_full_js %}`` and ``{% emberpie_js %}``
 - Support query string in ``TastypieAdapater`` (thanks to Peter Sutton/dj-foxxy)
-- Provide both minified and unminified versions
+- Provide both minified and unminified versions (triggered by ``settings.DEBUG``)
 
 
 0.1 (2012-08-06)

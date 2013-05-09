@@ -9,6 +9,7 @@ Inspired by:
 '''
 
 from django import template
+from django.conf import settings
 
 from djangojs.templatetags.js import VerbatimNode, verbatim_tags, js_lib, jquery_js
 
@@ -68,25 +69,22 @@ def handlebars(parser, token):
 
 @register.simple_tag
 def handlebars_js():
-    return js_lib('handlebars.js')
+    return js_lib('handlebars.js' if settings.DEBUG else 'handlebars.min.js')
 
 
 @register.simple_tag
 def ember_js():
-    return js_lib('ember.js')
+    return js_lib('ember.js' if settings.DEBUG else 'ember.min.js')
 
 
 @register.simple_tag
 def ember_data_js():
-    return js_lib('ember-data.js')
+    return js_lib('ember-data.js' if settings.DEBUG else 'ember-data.min.js')
 
 
 @register.simple_tag
 def tastypie_adapter_js():
-    return '\n'.join((
-        # js_lib('tastypie_serializer.js'),
-        js_lib('tastypie_adapter.js'),
-    ))
+    return js_lib('tastypie_adapter.js' if settings.DEBUG else 'tastypie_adapter.min.js')
 
 
 @register.simple_tag

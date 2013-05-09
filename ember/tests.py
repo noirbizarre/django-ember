@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.template import Context, Template
 from django.test import TestCase
-from django.conf import settings
+from django.test.utils import override_settings
 
 from djangojs.runners import JsTestCase, JasmineSuite
 
@@ -74,8 +75,9 @@ class TemplateTagsTest(TestCase):
         self.assertIn('<p>', rendered)
         self.assertIn('</p>', rendered)
 
-    def test_handlebars_js(self):
-        '''Should include Handlebars library'''
+    @override_settings(DEBUG=True)
+    def test_handlebars_js_unminified(self):
+        '''Should include unminified Handlebars library when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% handlebars_js %}
@@ -83,8 +85,19 @@ class TemplateTagsTest(TestCase):
         rendered = t.render(Context())
         self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
 
-    def test_ember_js(self):
-        '''Should include Ember.js library'''
+    @override_settings(DEBUG=False)
+    def test_handlebars_js_minified(self):
+        '''Should include minified Handlebars library when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% handlebars_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
+    def test_ember_js_unminified(self):
+        '''Should include unminified Ember.js library when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% ember_js %}
@@ -92,8 +105,19 @@ class TemplateTagsTest(TestCase):
         rendered = t.render(Context())
         self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
-    def test_ember_data_js(self):
-        '''Should include Ember Data library'''
+    @override_settings(DEBUG=False)
+    def test_ember_js_minified(self):
+        '''Should include minified Ember.js library when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% ember_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
+    def test_ember_data_js_unminified(self):
+        '''Should include unminified Ember Data library when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% ember_data_js %}
@@ -101,8 +125,19 @@ class TemplateTagsTest(TestCase):
         rendered = t.render(Context())
         self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL, rendered)
 
+    @override_settings(DEBUG=False)
+    def test_ember_data_js_minified(self):
+        '''Should include minified Ember Data library when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% ember_data_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
     def test_tastypie_adapter_js(self):
-        '''Should include Tastypie Adapterlibrary'''
+        '''Should include unminified Tastypie Adapter library when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% tastypie_adapter_js %}
@@ -110,8 +145,19 @@ class TemplateTagsTest(TestCase):
         rendered = t.render(Context())
         self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL, rendered)
 
+    @override_settings(DEBUG=False)
+    def test_tastypie_adapter_js_minified(self):
+        '''Should include minified Tastypie Adapter library when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% tastypie_adapter_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
     def test_ember_full_js(self):
-        '''Should include Ember full JS stack libraries'''
+        '''Should include Ember full unminified JS stack libraries when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% ember_full_js %}
@@ -121,6 +167,19 @@ class TemplateTagsTest(TestCase):
         self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
         self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
+    @override_settings(DEBUG=False)
+    def test_ember_full_js_minified(self):
+        '''Should include Ember full minified JS stack libraries when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% ember_full_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.min.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
     def test_ember_full_js_without_jquery(self):
         '''Should include Ember full JS stack libraries without jquery'''
         t = Template('''
@@ -132,8 +191,9 @@ class TemplateTagsTest(TestCase):
         self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.js">' % settings.STATIC_URL, rendered)
         self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.js">' % settings.STATIC_URL, rendered)
 
-    def test_emberpie_js(self):
-        '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
+    @override_settings(DEBUG=True)
+    def test_emberpie_js_unminified(self):
+        '''Should include Ember full stack, Ember Data and Tastypie Adapter JS unminified libraries when DEBUG=True'''
         t = Template('''
             {% load ember %}
             {% emberpie_js %}
@@ -145,6 +205,21 @@ class TemplateTagsTest(TestCase):
         self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.js">' % settings.STATIC_URL, rendered)
         self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.js">' % settings.STATIC_URL, rendered)
 
+    @override_settings(DEBUG=False)
+    def test_emberpie_js_minified(self):
+        '''Should include Ember full stack, Ember Data and Tastypie Adapter JS minified libraries when DEBUG=False'''
+        t = Template('''
+            {% load ember %}
+            {% emberpie_js %}
+            ''')
+        rendered = t.render(Context())
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/jquery' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/handlebars.min.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember.min.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/ember-data.min.js">' % settings.STATIC_URL, rendered)
+        self.assertIn('<script type="text/javascript" src="%sjs/libs/tastypie_adapter.min.js">' % settings.STATIC_URL, rendered)
+
+    @override_settings(DEBUG=True)
     def test_emberpie_js_without_jquery(self):
         '''Should include Ember full stack, Ember Data and Tastypie Adapter JS libraries'''
         t = Template('''
