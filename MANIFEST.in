@@ -1,3 +1,4 @@
 include README.rst LICENSE CHANGELOG.rst MANIFEST.in
 recursive-include  ember/static *.js
 recursive-include  ember/templates *.html
+recursive-include  requirements *.pip

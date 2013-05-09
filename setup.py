@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from os.path import join
 import re
 from setuptools import setup, find_packages
 
@@ -25,6 +26,12 @@ def rst(filename):
     return content
 
 
+def pip(filename):
+    '''Parse pip requirement file and transform it to setuptools requirements'''
+    path = join('requirements', filename)
+    return [line for line in open(path).readlines() if not line.startswith('-e')]
+
+
 long_description = '\n'.join((
     rst('README.rst'),
     rst('CHANGELOG.rst'),
@@ -42,7 +49,8 @@ setup(
     author_email='noirbizarre+django@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['django>=1.4.2', 'django.js>=0.7.0'],
+    install_requires=pip('install.pip'),
+    tests_require=pip('test.pip'),
     use_2to3=True,
     license='LGPL',
     classifiers=[
