@@ -109,3 +109,71 @@ def django_ember_js(jquery=True):
     return {
         'djangojs_jquery': jquery,
     }
+
+    
+@register.tag(name='linkto')
+def do_linkto(parser, token):
+    nodelist = parser.parse(('endlinkto',))
+    args = token.split_contents()[1:]
+    if not args:
+        raise template.TemplateSyntaxError("{0} tag requires at least one argument".format(token.contents.split()[0]))
+    parser.delete_first_token()
+    return LinkToNode(nodelist, *args)
+
+
+class LinkToNode(template.Node):
+    '''
+    Renders ``{% linkto arg1, "arg2" ... argn %} ... {% endlinkto %}``
+    as ``{{#linkTo arg1 "arg2" ... argn }} ... {{/linkTo}}``.
+    
+    The arguments are rendered ipsis literis, quotes included.
+    
+    The tag content is parsed as a normal Django template (it is not like verbatim).
+    
+    If you need a Handlebars.js tag or variable use ``{% ember varname %}``, this will
+    be rendered as ``{{ varname }}``.
+    '''
+    def __init__(self, nodelist, *args):
+        self.args = args
+        self.nodelist = nodelist
+
+    def render(self, context):
+        output = self.nodelist.render(context)
+        return "{{#linkTo " + " ".join(self.args) + '}}' + output + "{{/linkTo}}"
+
+
+@register.tag(name='ember')
+def do_ember(parser, token):
+    tokens = token.split_contents()
+    args = " ".join(tokens[1:])
+    #parser.delete_first_token()
+    return EmberTagNode(args)
+
+
+class EmberTagNode(template.Node):
+    '''
+    Helper tag to escape Ember template constructs that conflict
+    with Django template syntax. When using ``verbatim`` style tags
+    sometimes it is hard to spot what is Ember and what is Django;
+    the purpose of this tag is making it easier.
+    
+    Usage:
+    
+    ::
+        {% ember varname %}
+        {% ember #tagname arg1 arg2 ... argn %} ... {% ember /tagname %}
+    
+    This will render as:
+    
+    ::
+        {{varname}}
+        {{#tagname arg1 arg2 ... argn}} ... {{/tagname}}
+    
+    This tag is not aware of the Ember template syntax, it will
+    just escape the constructs but will not make any check.
+    '''
+    def __init__(self, args):
+        self.args = args
+
+    def render(self, context):
+        return "{{" + self.args + "}}"
