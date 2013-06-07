@@ -4,7 +4,7 @@ Changelog
 Current
 -------
 
-- nothing yet
+- Added template tag helpers ``linkTo`` and ``ember`` (thanks to Paulo Scardine)
 
 
 0.2.0 (2013-05-09)
