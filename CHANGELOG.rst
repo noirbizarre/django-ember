@@ -5,6 +5,10 @@ Current
 -------
 
 - Added template tag helpers ``linkTo`` and ``ember`` (thanks to Paulo Scardine)
+- Upgraded to Ember.js 1.0.0-RC.5
+- Upgraded to Ember Data 0.13
+- Upgraded to latest Ember Data Tastypie Adapter (9db4b9a)
+- Upgraded to Handlebars 1.0.0
 
 
 0.2.0 (2013-05-09)

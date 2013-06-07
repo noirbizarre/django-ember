@@ -2,6 +2,14 @@ var get = Ember.get, set = Ember.set;
 
 DS.DjangoTastypieSerializer = DS.JSONSerializer.extend({
 
+  init: function() {
+    this._super();
+
+    this.configure({
+      meta: 'meta',
+      since: 'next'
+    });
+  },
 
   getItemUrl: function(meta, id){
     var url;
@@ -21,25 +29,38 @@ DS.DjangoTastypieSerializer = DS.JSONSerializer.extend({
   */
   addBelongsTo: function(hash, record, key, relationship) {
     var id,
-        related = get(record, relationship.key);
+        related = get(record, relationship.key),
+        embedded = this.embeddedType(record.constructor, key);
 
-    id = get(related, this.primaryKey(related));
+    if (embedded === 'always') {
+      hash[key] = related.serialize();
 
-    if (!Ember.isNone(id)) { hash[key] = this.getItemUrl(relationship, id); }
+    } else {
+      id = get(related, this.primaryKey(related));
+
+      if (!Ember.isNone(id)) { hash[key] = this.getItemUrl(relationship, id); }
+    }
   },
 
   addHasMany: function(hash, record, key, relationship) {
     var self = this,
         serializedValues = [],
-        id = null;
+        id = null,
+        embedded = this.embeddedType(record.constructor, key);
 
     key = this.keyForHasMany(relationship.type, key);
 
     value = record.get(key) || [];
 
     value.forEach(function(item) {
-      id = get(item, self.primaryKey(item));
-      serializedValues.push(self.getItemUrl(relationship, id));
+      if (embedded === 'always') {
+        serializedValues.push(item.serialize());
+      } else {
+        id = get(item, self.primaryKey(item));
+        if (!Ember.isNone(id)) {
+          serializedValues.push(self.getItemUrl(relationship, id));
+        }
+      }
     });
 
     hash[key] = serializedValues;
@@ -77,19 +98,20 @@ DS.DjangoTastypieSerializer = DS.JSONSerializer.extend({
   },
 
   extractMeta: function(loader, type, json) {
-    var meta = json.meta,
-      since = this.extractSince(meta);
+    var meta = this.configOption(type, 'meta'),
+        data = json, value;
 
-    // this registers the id with the store, so it will be passed
-    // into the next call to `findAll`
-    if (since) { loader.sinceForType(type, since); }
-  },
-
-  extractSince: function(meta) {
-    if (meta) {
-      return meta.next;
+    if(meta && json[meta]){
+      data = json[meta];
     }
+
+    this.metadataMapping.forEach(function(property, key){
+      if(value = data[property]){
+        loader.metaForType(type, key, value);
+      }
+    });
   },
+
   /**
    Tastypie default does not support sideloading
    */
@@ -136,6 +158,11 @@ DS.DjangoTastypieSerializer = DS.JSONSerializer.extend({
 });
 
 var get = Ember.get, set = Ember.set;
+
+function rejectionHandler(reason) {
+  Ember.Logger.error(reason, reason.message);
+  throw reason;
+}
 
 DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
   /**
@@ -191,16 +218,19 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
   */
   createRecord: function(store, type, record) {
     var data,
-        root = this.rootForType(type);
+        root = this.rootForType(type),
+        adapter = this;
 
     data = record.serialize();
 
-    this.ajax(this.buildURL(root), "POST", {
-      data: data,
-      success: function(json) {
-        this.didCreateRecord(store, type, record, json);
-      }
-    });
+    return this.ajax(this.buildURL(root), "POST", {
+      data: data
+    }).then(function(json){
+      adapter.didCreateRecord(store, type, record, json);
+    }, function(xhr) {
+      adapter.didError(store, type, record, xhr);
+      throw xhr;
+    }).then(null, rejectionHandler);
   },
 
   /**
@@ -208,20 +238,21 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
     be enabled in the Resource
   */
   updateRecord: function(store, type, record) {
-    var id,
-        data;
+    var id, data,
+        root = this.rootForType(type),
+        adapter = this;
 
-    id = Em.get(record, 'id');
-    root = this.rootForType(type);
-
+    id = get(record, 'id');
     data = record.serialize();
 
-    this.ajax(this.buildURL(root, id), "PUT", {
-      data: data,
-      success: function(json) {
-        this.didSaveRecord(store, type, record, json);
-      }
-    });
+    return this.ajax(this.buildURL(root, id), "PUT",{
+      data: data
+    }).then(function(json){
+      adapter.didUpdateRecord(store, type, record, json);
+    }, function(xhr) {
+      adapter.didError(store, type, record, xhr);
+      throw xhr;
+    }).then(null, rejectionHandler);
   },
 
   /**
@@ -230,21 +261,23 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
   */
   deleteRecord: function(store, type, record) {
     var id,
-        root;
+        root = this.rootForType(type),
+        adapter = this;
 
     id = get(record, 'id');
-    root = this.rootForType(type);
 
-    this.ajax(this.buildURL(root, id), "DELETE", {
-      success: function(json) {
-        this.didSaveRecord(store, type, record, json);
-      }
-    });
+    return this.ajax(this.buildURL(root, id), "DELETE").then(function(json){
+      adapter.didDeleteRecord(store, type, record, json);
+    }, function(xhr){
+      adapter.didError(store, type, record, xhr);
+      throw xhr;
+    }).then(null, rejectionHandler);
   },
 
   findMany: function(store, type, ids) {
     var url,
-        root = this.rootForType(type);
+        root = this.rootForType(type),
+        adapter = this;
 
     ids = this.serializeIds(ids);
 
@@ -261,6 +294,10 @@ DS.DjangoTastypieAdapter = DS.RESTAdapter.extend({
         this.didFindMany(store, type, json);
       }
     });
+    return this.ajax(url, "GET", {
+    }).then(function(json) {
+      adapter.didFindMany(store, type, json);
+    }).then(null, rejectionHandler);
   },
 
   buildURL: function(record, suffix) {
