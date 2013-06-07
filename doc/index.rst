@@ -15,7 +15,7 @@ It use `Django.js`_ as base and is inspired from:
 Compatibility
 =============
 
-Django Ember requires Python 2.7+, Django 1.4.2+ and Django.js 0.7.0+.
+Django Ember requires Python 2.6+, Django 1.4.2+ and Django.js 0.7.6+.
 
 
 Installation

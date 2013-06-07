@@ -9,6 +9,7 @@ Current
 - Upgraded to Ember Data 0.13
 - Upgraded to latest Ember Data Tastypie Adapter (9db4b9a)
 - Upgraded to Handlebars 1.0.0
+- Python 2.6 support
 
 
 0.2.0 (2013-05-09)
