@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Current
--------
+0.3.0 (2013-06-07)
+------------------
 
 - Added template tag helpers ``linkTo`` and ``ember`` (thanks to Paulo Scardine)
 - Upgraded to Ember.js 1.0.0-RC.5
