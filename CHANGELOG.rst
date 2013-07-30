@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Current
--------
+0.3.1 (2013-07-30)
+------------------
 
 - Upgraded to Ember.js 1.0.0-RC.6.1
 - Upgraded to Ember Data 0.13-78-g9602df4
