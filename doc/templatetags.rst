@@ -26,9 +26,9 @@ JS Libraries templates tags
 =============================  ===============================================================================
               Tag                                                 JS Library
 =============================  ===============================================================================
-``{% handlebars_js %}``        `Handlebars.js`_ (1.0.0)
-``{% ember_js %}``             `Ember.js`_ (1.0.0-RC.5)
-``{% ember_data_js %}``        `Ember Data`_ (0.13)
+``{% handlebars_js %}``        `Handlebars.js`_ (1.0.0-rc.4)
+``{% ember_js %}``             `Ember.js`_ (1.0.0-RC.6.1)
+``{% ember_data_js %}``        `Ember Data`_ (0.13-78-g9602df4)
 ``{% tastypie_adapter_js %}``  `Ember Data Tastypie Adapter`_ (9db4b9a)
 ``{% ember_full_js %}``        Ember.js + Handlebars.js + jQuery (optionnal)
 ``{% emberpie_js %}``          Ember.js + Handlebars.js + jQuery (optionnal) + Ember Data + Tastypie Adapter

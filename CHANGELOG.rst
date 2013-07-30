@@ -4,7 +4,9 @@ Changelog
 Current
 -------
 
-- nothing yet
+- Upgraded to Ember.js 1.0.0-RC.6.1
+- Upgraded to Ember Data 0.13-78-g9602df4
+- Downgraded to Handlebars to ensure compatibility until release
 
 
 0.3.0 (2013-06-07)
