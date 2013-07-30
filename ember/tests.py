@@ -111,8 +111,8 @@ class TemplateTagsTest(TestCase):
         self.assertIn('{{else}}', rendered)
         self.assertIn('{{/if}}', rendered)
         self.assertIn('<h1>' + msg1 + ' {{User.firstName}}</h1>', rendered)
-        self.assertIn('<p>' + msg2 + '</p>', rendered)        
-        
+        self.assertIn('<p>' + msg2 + '</p>', rendered)
+
     @override_settings(DEBUG=True)
     def test_handlebars_js_unminified(self):
         '''Should include unminified Handlebars library when DEBUG=True'''

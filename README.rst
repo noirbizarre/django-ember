@@ -3,6 +3,13 @@ Django Ember
 
 .. image:: https://secure.travis-ci.org/noirbizarre/django-ember.png
    :target: http://travis-ci.org/noirbizarre/django-ember
+.. image:: https://coveralls.io/repos/noirbizarre/django-ember/badge.png?branch=master
+    :target: https://coveralls.io/r/noirbizarre/django-ember
+.. image:: https://pypip.in/v/django-ember/badge.png
+    :target: https://crate.io/packages/django-ember
+.. image:: https://pypip.in/d/django-ember/badge.png
+    :target: https://crate.io/packages/django-ember
+
 
 Django Ember help integrates Ember.js in Django.
 It use `Django.js`_ as base and is inspired from:

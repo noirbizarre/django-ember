@@ -13,3 +13,4 @@ dist/
 .codeintel/
 .tox
 /doc/_build
+.coverage
