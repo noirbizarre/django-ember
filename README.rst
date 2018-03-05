@@ -5,9 +5,9 @@ Django Ember
    :target: http://travis-ci.org/noirbizarre/django-ember
 .. image:: https://coveralls.io/repos/noirbizarre/django-ember/badge.png?branch=master
     :target: https://coveralls.io/r/noirbizarre/django-ember
-.. image:: https://pypip.in/v/django-ember/badge.png
+.. image:: https://img.shields.io/pypi/v/django-ember.svg
     :target: https://crate.io/packages/django-ember
-.. image:: https://pypip.in/d/django-ember/badge.png
+.. image:: https://img.shields.io/pypi/dm/django-ember.svg
     :target: https://crate.io/packages/django-ember
 
 
